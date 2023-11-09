@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, KeyboardEvent } from "react";
 import { useQuery } from "@apollo/client";
 import Select, { Props, SingleValue } from "react-select";
 
@@ -69,6 +69,8 @@ function App() {
   const [selectedLevel, setSelectedLevel] =
     useState<SingleValue<OptionLevel>>("");
 
+  const isOpen = isModalOpen;
+
   function closePopup() {
     setIsModalOpen(false);
   }
@@ -79,6 +81,20 @@ function App() {
       ...vehicle,
     });
   }
+
+  useEffect(() => {
+    function closeByEscape(evt: KeyboardEvent<HTMLImageElement>) {
+      if (evt.key === "Escape") {
+        closePopup();
+      }
+    }
+    if (isOpen) {
+      document.addEventListener("keydown", closeByEscape);
+      return () => {
+        document.removeEventListener("keydown", closeByEscape);
+      };
+    }
+  }, [isOpen]);
 
   if (queryShips.loading)
     return <p className='text-3xl m-10'>Loading ships...</p>;
