@@ -7,4 +7,4 @@ React, TS, Tailwind CSS, Vite
 
 ## Installation
 
-To run app execute 'npm install' and npm 'run dev'
+To run app execute 'npm install' and 'npm run dev'
