@@ -61,6 +61,7 @@ function App() {
   const queryShips = useQuery(SHIPS);
   let ships: IShip = { ...queryShips.data };
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<IVehicle | {}>({});
   const [selectedNation, setSelectedNation] =
     useState<SingleValue<OptionType>>("");
   const [selectedClass, setSelectedClass] =
@@ -68,87 +69,86 @@ function App() {
   const [selectedLevel, setSelectedLevel] =
     useState<SingleValue<OptionLevel>>("");
 
-  const isOpen = isModalOpen;
-
   function closePopup() {
     setIsModalOpen(false);
   }
 
-  function handleCardClick(card) {
+  function handleCardClick(vehicle: IVehicle) {
+    setIsModalOpen(!isModalOpen);
     setSelectedCard({
-      ...selectedCard,
-      isOpen: true,
-      link: card.link,
-      name: card.name,
+      ...vehicle,
     });
+  }
 
-    if (queryShips.loading)
-      return <p className='text-3xl m-10'>Loading ships...</p>;
-    if (queryShips.error) return `Error! ${queryShips.error.message}`;
+  if (queryShips.loading)
+    return <p className='text-3xl m-10'>Loading ships...</p>;
+  if (queryShips.error) return `Error! ${queryShips.error.message}`;
 
-    if (selectedNation) {
-      ships.vehicles = ships.vehicles.filter((vehicle: IVehicle) =>
-        vehicle.nation.name.includes(selectedNation.value)
-      );
-    }
-    if (selectedClass) {
-      ships.vehicles = ships.vehicles.filter((vehicle: IVehicle) =>
-        vehicle.type.name.includes(selectedClass.value)
-      );
-    }
-    if (selectedLevel) {
-      selectedLevel.value !== "" &&
-        (ships.vehicles = ships.vehicles.filter(
-          (vehicle: IVehicle) => vehicle.level === selectedLevel.value
-        ));
-    } else {
-      ships.vehicles = ships.vehicles.map((vehicle: IVehicle) => vehicle);
-    }
-
-    return (
-      <>
-        <h1 className=''>World of Warships </h1>
-        <div className='grid grid-cols-3 gap-5 mt-6 text-black'>
-          <CustomSelect
-            placeholder={"All nations"}
-            defaultValue={selectedNation}
-            onChange={setSelectedNation}
-            options={shipNation}
-            isSearchable={false}
-          />
-
-          <Select
-            placeholder={"All levels"}
-            defaultValue={selectedLevel}
-            onChange={setSelectedLevel}
-            options={shipLevel}
-            isSearchable={false}
-          />
-          <Select
-            placeholder={"All classes"}
-            defaultValue={selectedClass}
-            onChange={setSelectedClass}
-            options={shipClass}
-            isSearchable={false}
-          />
-        </div>
-        <div className='mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4'>
-          {ships.vehicles.length > 0 ? (
-            ships.vehicles.map((vehicle) => (
-              <Card
-                key={vehicle.icons.medium}
-                vehicle={vehicle}
-                onCardClick={onCardClick}
-              />
-            ))
-          ) : (
-            <p>No such ships. Choose another filters</p>
-          )}
-        </div>
-        <Modal isOpen={isModalOpen} onClose={closePopup} />
-      </>
+  if (selectedNation) {
+    ships.vehicles = ships.vehicles.filter((vehicle: IVehicle) =>
+      vehicle.nation.name.includes(selectedNation.value)
     );
   }
+  if (selectedClass) {
+    ships.vehicles = ships.vehicles.filter((vehicle: IVehicle) =>
+      vehicle.type.name.includes(selectedClass.value)
+    );
+  }
+  if (selectedLevel) {
+    selectedLevel.value !== "" &&
+      (ships.vehicles = ships.vehicles.filter(
+        (vehicle: IVehicle) => vehicle.level === selectedLevel.value
+      ));
+  } else {
+    ships.vehicles = ships.vehicles.map((vehicle: IVehicle) => vehicle);
+  }
+  console.log(ships);
+
+  return (
+    <>
+      <h1 className='text-5xl py-2'>World of Warships </h1>
+      <div className='grid grid-cols-3 gap-5 py-5 text-black'>
+        <CustomSelect
+          placeholder={"All nations"}
+          defaultValue={selectedNation}
+          onChange={setSelectedNation}
+          options={shipNation}
+          isSearchable={false}
+        />
+
+        <Select
+          placeholder={"All levels"}
+          defaultValue={selectedLevel}
+          onChange={setSelectedLevel}
+          options={shipLevel}
+          isSearchable={false}
+        />
+        <Select
+          placeholder={"All classes"}
+          defaultValue={selectedClass}
+          onChange={setSelectedClass}
+          options={shipClass}
+          isSearchable={false}
+        />
+      </div>
+
+      <div className='mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4'>
+        {ships.vehicles.length > 0 ? (
+          ships.vehicles.map((vehicle) => (
+            <Card
+              key={vehicle.icons.medium}
+              vehicle={vehicle}
+              onCardClick={handleCardClick}
+            />
+          ))
+        ) : (
+          <p>No such ships. Choose another filters</p>
+        )}
+      </div>
+      <Modal vehicle={selectedCard} onClose={closePopup} open={isModalOpen} />
+    </>
+  );
 }
+// }
 
 export default App;
